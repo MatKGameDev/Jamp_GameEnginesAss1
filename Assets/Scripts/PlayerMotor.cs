@@ -15,8 +15,9 @@ public class PlayerMotor : MonoBehaviour
         Back
     }
 
+    public PlayerRotationController rotationController;
+
     [SerializeField] Camera mainCamera = null;
-    [SerializeField] PlayerRotationController rotationController;
 
     [Header("Grounded Basic Movement")]
     [SerializeField] float accelerationRateGrounded = 0f;

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerRotationController : MonoBehaviour
 {
@@ -37,8 +38,8 @@ public class PlayerRotationController : MonoBehaviour
     {
         m_transform = transform;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible   = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible   = false;
     }
 
     void Update()
@@ -54,6 +55,25 @@ public class PlayerRotationController : MonoBehaviour
         m_transform.localRotation = Quaternion.Euler(newRotation);
 
         yaw += m_currentFrameMouseX;
+        playerTransform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+    }
+
+    public void SetRotation(Vector3 a_newEulerAngles)
+    {
+        if (!m_transform)
+        {
+            m_transform = transform;
+        }
+
+        pitch = a_newEulerAngles.x;
+        yaw   = a_newEulerAngles.y;
+        roll  = a_newEulerAngles.z;
+
+        Vector3 newRotation = m_transform.localRotation.eulerAngles;
+        newRotation.x = pitch;
+        newRotation.z = roll;
+        m_transform.localRotation = Quaternion.Euler(newRotation);
+
         playerTransform.localRotation = Quaternion.Euler(0f, yaw, 0f);
     }
 
