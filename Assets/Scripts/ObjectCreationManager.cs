@@ -14,9 +14,16 @@ public class ObjectCreationManager : MonoBehaviour
 
     public List<GameObject> prefabObjects = new List<GameObject>();
 
-    int activePrefabIndex;
+    int m_activePrefabIndex;
 
-    GameObject controlledObject = null;
+    GameObject m_controlledObject = null;
+
+    bool m_isRotating = true;
+    bool m_isScaling  = false;
+
+    bool m_isAxisX = true;
+    bool m_isAxisY = true;
+    bool m_isAxisZ = true;
 
     void Start()
     {
@@ -29,56 +36,70 @@ public class ObjectCreationManager : MonoBehaviour
         if (!cameraModeManager.isFreeCameraMode)
             return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) 
-            SetActivePrefabIndex(0);
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-            SetActivePrefabIndex(1);
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-            SetActivePrefabIndex(2);
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-            SetActivePrefabIndex(3);
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-            SetActivePrefabIndex(4);
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-            SetActivePrefabIndex(5);
-        else if (Input.GetKeyDown(KeyCode.Alpha7))
-            SetActivePrefabIndex(6);
-        else if (Input.GetKeyDown(KeyCode.Alpha8))
-            SetActivePrefabIndex(7);
-        else if (Input.GetKeyDown(KeyCode.Alpha9))
-            SetActivePrefabIndex(8);
-
         float mouseScrollWheelDelta = Input.GetAxis("Mouse ScrollWheel");
-        if (mouseScrollWheelDelta > 0f) // if scrollwheel has moved up
+        if (mouseScrollWheelDelta > 0f || Input.GetKeyDown(KeyCode.RightArrow)) // if scrollwheel has moved up
         {
-            int newActivePrefabIndex = activePrefabIndex + 1;
+            int newActivePrefabIndex = m_activePrefabIndex + 1;
             if (newActivePrefabIndex >= prefabObjects.Count)
                 newActivePrefabIndex = 0;
 
             SetActivePrefabIndex(newActivePrefabIndex);
         }
-        else if (mouseScrollWheelDelta < 0f) // if scrollwheel has moved down
+        else if (mouseScrollWheelDelta < 0f || Input.GetKeyDown(KeyCode.LeftArrow)) // if scrollwheel has moved down
         {
-            int newActivePrefabIndex = activePrefabIndex - 1;
+            int newActivePrefabIndex = m_activePrefabIndex - 1;
             if (newActivePrefabIndex < 0)
                 newActivePrefabIndex = prefabObjects.Count - 1;
 
             SetActivePrefabIndex(newActivePrefabIndex);
         }
 
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            m_isRotating = true;
+            m_isScaling  = false;
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            m_isRotating = false;
+            m_isScaling  = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            m_isAxisX = !m_isAxisX;
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+            m_isAxisY = !m_isAxisY;
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+            m_isAxisZ = !m_isAxisZ;
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            if (!m_isAxisX || !m_isAxisY || !m_isAxisZ)
+            {
+                m_isAxisX = true;
+                m_isAxisY = true;
+                m_isAxisZ = true;
+            }
+            else
+            {
+                m_isAxisX = false;
+                m_isAxisY = false;
+                m_isAxisZ = false;
+            }
+        }
+
         if (Input.GetMouseButtonDown(0)) //left click
         {
-            if (!controlledObject)
+            if (!m_controlledObject)
             {
                 //fire ray and check for gameobject hit
 
             }
             else //and object is being controlled
             {
-                controlledObject.layer = 0; //default layer
-                controlledObject = null;
+                m_controlledObject.layer = 0; //default layer
+                m_controlledObject = null;
 
-                SetActivePrefabIndex(activePrefabIndex);
+                SetActivePrefabIndex(m_activePrefabIndex);
             }
         }
     }
@@ -88,21 +109,29 @@ public class ObjectCreationManager : MonoBehaviour
         if (!cameraModeManager.isFreeCameraMode)
             return;
 
-        if (controlledObject)
+        if (m_controlledObject)
         {
-            controlledObject.layer = 12; //first person prefab layer
+            m_controlledObject.layer = 12; //first person prefab layer
 
-            controlledObject.transform.position = freeCameraTransform.position + (freeCameraTransform.forward * firstPersonObjectOffset);
+            m_controlledObject.transform.position = freeCameraTransform.position + (freeCameraTransform.forward * firstPersonObjectOffset);
 
-            if (Input.GetKey(KeyCode.Q))
-                controlledObject.transform.Rotate(Vector3.up, objectRotationSpeed * Time.deltaTime);
-            if (Input.GetKey(KeyCode.E))
-                controlledObject.transform.Rotate(Vector3.up, -objectRotationSpeed * Time.deltaTime);
+            Vector3 currentAxis = new Vector3(Convert.ToInt32(m_isAxisX), Convert.ToInt32(m_isAxisY), Convert.ToInt32(m_isAxisZ));
 
-            if (Input.GetKey(KeyCode.R))
-                controlledObject.transform.localScale *= 1f + (objectScaleSpeed * Time.deltaTime);
-            if (Input.GetKey(KeyCode.T))
-                controlledObject.transform.localScale *= 1f - (objectScaleSpeed * Time.deltaTime);
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                if (m_isRotating)
+                    m_controlledObject.transform.Rotate(currentAxis, objectRotationSpeed * Time.deltaTime);
+                else //isScaling
+                    m_controlledObject.transform.localScale += objectScaleSpeed * Time.deltaTime * currentAxis;
+            }
+
+            if (Input.GetKey(KeyCode.DownArrow))
+            {
+                if (m_isRotating)
+                    m_controlledObject.transform.Rotate(currentAxis, -objectRotationSpeed * Time.deltaTime);
+                else //isScaling
+                    m_controlledObject.transform.localScale -= objectScaleSpeed * Time.deltaTime * currentAxis;
+            }
         }
     }
 
@@ -111,10 +140,10 @@ public class ObjectCreationManager : MonoBehaviour
         if (prefabObjects.Count <= a_newActivePrefabIndex)
             return;
 
-        activePrefabIndex = a_newActivePrefabIndex;
+        m_activePrefabIndex = a_newActivePrefabIndex;
 
-        Destroy(controlledObject);
+        Destroy(m_controlledObject);
 
-        controlledObject = Instantiate(prefabObjects[a_newActivePrefabIndex]);
+        m_controlledObject = Instantiate(prefabObjects[a_newActivePrefabIndex]);
     }
 }

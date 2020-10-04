@@ -30,7 +30,7 @@ public class CameraModeManager : MonoBehaviour
         if (a_isFreeCameraMode)
         {
             freeCameraObject.transform.position = playerObject.transform.position;
-            freeCameraObject.transform.rotation = playerObject.transform.rotation;
+            freeCameraObject.transform.rotation = Quaternion.Euler(playerObject.GetComponent<PlayerMotor>().rotationController.GetEulerRotation());
 
             playerObject.SetActive(false);
             freeCameraObject.SetActive(true);
@@ -39,7 +39,6 @@ public class CameraModeManager : MonoBehaviour
             Cursor.visible   = true;
         }
         else
-
         {
             playerObject.transform.position = freeCameraObject.transform.position;
 

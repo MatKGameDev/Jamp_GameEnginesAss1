@@ -13,7 +13,6 @@ public class PlayerRotationController : MonoBehaviour
 
     Transform m_transform;
 
-
     float m_currentFrameMouseX;
 
     public float CurrentFrameMouseX
@@ -56,6 +55,11 @@ public class PlayerRotationController : MonoBehaviour
 
         yaw += m_currentFrameMouseX;
         playerTransform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+    }
+
+    public Vector3 GetEulerRotation()
+    {
+        return new Vector3(pitch, yaw, roll);
     }
 
     public void SetRotation(Vector3 a_newEulerAngles)
