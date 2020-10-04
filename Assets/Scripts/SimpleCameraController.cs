@@ -151,8 +151,7 @@ namespace UnityTemplateProjects
                 translation *= 10.0f;
             }
 
-            // Modify movement by a boost factor (defined in Inspector and modified in play mode through the mouse scroll wheel)
-            boost += Input.mouseScrollDelta.y * 0.2f;
+            // Modify movement by a boost factor (defined in Inspector)
             translation *= Mathf.Pow(2.0f, boost);
 
 #elif USE_INPUT_SYSTEM 
