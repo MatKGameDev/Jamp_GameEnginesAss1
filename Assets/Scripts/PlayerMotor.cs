@@ -208,8 +208,9 @@ public class PlayerMotor : MonoBehaviour
             }
 
             if (wallHitGameObject 
-                && !m_isGrounded 
-                && (m_lastWallRunTime + wallRunCooldown < Time.time && verticalAxis == 1
+                && !m_isGrounded
+                && verticalAxis == 1
+                && (m_lastWallRunTime + wallRunCooldown < Time.time 
                 || wallHitGameObject != m_lastObjectWallRunOn))
             {
                 StartWallRun(wallHitGameObject, wallHitNormal);
