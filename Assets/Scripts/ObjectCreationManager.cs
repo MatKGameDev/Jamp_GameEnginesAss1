@@ -35,14 +35,13 @@ public class ObjectCreationManager : MonoBehaviour
     public Image arrowUpImage;
     public Image arrowDownImage;
 
-    int m_activePrefabIndex;
+    int m_activePrefabIndex = -1;
     int m_activeMaterialIndex;
 
     float      m_controlledObjectDistance;
     GameObject m_controlledObject  = null;
     GameObject m_highlightedObject = null;
-    GameObject m_controlledObject = null;
-    Material m_currentMaterial = null;
+    Material   m_currentMaterial   = null;
 
     bool m_isRotating = true;
     bool m_isScaling  = false;
@@ -157,22 +156,23 @@ public class ObjectCreationManager : MonoBehaviour
             {
                 m_controlledObject.layer = 0; //default layer
                 m_controlledObject       = null; //place the object
+                m_currentMaterial        = null;
 
-                m_currentMaterial = null;
+                m_activePrefabIndex = -1;
 
                 SetActivePrefabIndex(m_activePrefabIndex);
                 SetActiveMaterialIndex(m_activeMaterialIndex);
 
-                Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
+                //Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
 
-                if (!gameObjectRenderer)
-                {
-                    Debug.Log("doesn't have a renderer");
-                }
-                else
-                {
-                    gameObjectRenderer.material = m_currentMaterial;
-                }
+                //if (!gameObjectRenderer)
+                //{
+                //    Debug.Log("doesn't have a renderer");
+                //}
+                //else
+                //{
+                //    gameObjectRenderer.material = m_currentMaterial;
+                //}
             }
         }
     }
@@ -201,9 +201,7 @@ public class ObjectCreationManager : MonoBehaviour
                 gameObjectRenderer.material = m_currentMaterial;
             }
 
-
-
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.R))
             {
                 if (m_isRotating)
                     m_controlledObject.transform.Rotate(currentAxis, objectRotationSpeed * Time.deltaTime);
@@ -264,7 +262,7 @@ public class ObjectCreationManager : MonoBehaviour
 
     void SetActiveMaterialIndex(int a_newActiveMaterialIndex)
     {
-        if (materialTypes.Count <= a_newActiveMaterialIndex)
+        if (a_newActiveMaterialIndex >= materialTypes.Count || a_newActiveMaterialIndex < 0)
             return;
 
         m_activeMaterialIndex = a_newActiveMaterialIndex;
