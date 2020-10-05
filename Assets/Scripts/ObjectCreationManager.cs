@@ -1,20 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ObjectCreationManager : MonoBehaviour
 {
+    [Header("Camera")]
     public CameraModeManager cameraModeManager;
     public Transform freeCameraTransform;
 
+    [Header("Object Manipulation")]
     public float objectRotationSpeed;
     public float objectScaleSpeed;
 
     public float firstPersonObjectOffset;
 
+    [Header("Usable Prefabs")]
     public List<GameObject> prefabObjects = new List<GameObject>();
 
     public List<Material> materialTypes = new List<Material>();
+
+    [Header("UI")]
+    public Color selectedElementColor;
+    public Color nonSelectedElementColor;
+
+    public Image  manipulationModeImage;
+    public Sprite rotateIcon;
+    public Sprite scaleIcon;
+
+    public Image xAxisImage;
+    public Image yAxisImage;
+    public Image zAxisImage;
+
+    public Image arrowUpImage;
+    public Image arrowDownImage;
 
     int m_activePrefabIndex;
     int m_activeMaterialIndex;
@@ -78,35 +97,42 @@ public class ObjectCreationManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            m_isRotating = true;
-            m_isScaling  = false;
-        }
-        else if (Input.GetKeyDown(KeyCode.E))
-        {
-            m_isRotating = false;
-            m_isScaling  = true;
-        }
+            m_isRotating = !m_isRotating;
+            m_isScaling  = !m_isScaling;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            m_isAxisX = !m_isAxisX;
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-            m_isAxisY = !m_isAxisY;
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-            m_isAxisZ = !m_isAxisZ;
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            if (!m_isAxisX || !m_isAxisY || !m_isAxisZ)
+            if (m_isRotating)
             {
-                m_isAxisX = true;
-                m_isAxisY = true;
-                m_isAxisZ = true;
+                manipulationModeImage.sprite = rotateIcon;
             }
             else
             {
-                m_isAxisX = false;
-                m_isAxisY = false;
-                m_isAxisZ = false;
+                manipulationModeImage.sprite = scaleIcon;
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            m_isAxisX = !m_isAxisX;
+            if (m_isAxisX)
+                xAxisImage.color = selectedElementColor;
+            else
+                xAxisImage.color = nonSelectedElementColor;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            m_isAxisY = !m_isAxisY;
+            if (m_isAxisY)
+                yAxisImage.color = selectedElementColor;
+            else
+                yAxisImage.color = nonSelectedElementColor;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            m_isAxisZ = !m_isAxisZ;
+            if (m_isAxisZ)
+                zAxisImage.color = selectedElementColor;
+            else
+                zAxisImage.color = nonSelectedElementColor;
         }
 
         if (Input.GetMouseButtonDown(0)) //left click
@@ -172,6 +198,12 @@ public class ObjectCreationManager : MonoBehaviour
                     m_controlledObject.transform.Rotate(currentAxis, objectRotationSpeed * Time.deltaTime);
                 else //isScaling
                     m_controlledObject.transform.localScale += objectScaleSpeed * Time.deltaTime * currentAxis;
+
+                arrowUpImage.color = nonSelectedElementColor;
+            }
+            else
+            {
+                arrowUpImage.color = selectedElementColor;
             }
 
             if (Input.GetKey(KeyCode.DownArrow))
@@ -180,8 +212,13 @@ public class ObjectCreationManager : MonoBehaviour
                     m_controlledObject.transform.Rotate(currentAxis, -objectRotationSpeed * Time.deltaTime);
                 else //isScaling
                     m_controlledObject.transform.localScale -= objectScaleSpeed * Time.deltaTime * currentAxis;
-            }
 
+                arrowDownImage.color = nonSelectedElementColor;
+            }
+            else
+            {
+                arrowDownImage.color = selectedElementColor;
+            }
         }
     }
 
