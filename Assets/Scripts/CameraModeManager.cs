@@ -2,13 +2,21 @@
 using System.Collections.Generic;
 using UnityEditor.Build;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CameraModeManager : MonoBehaviour
 {
+    [Header("General")]
     public GameObject playerObject;
     public GameObject freeCameraObject;
 
     public bool isFreeCameraMode;
+
+    [Header("UI")]
+    public Image cameraModeImage;
+
+    public Sprite freeCameraIcon;
+    public Sprite playerCameraIcon;
 
     void Start()
     {
@@ -29,6 +37,8 @@ public class CameraModeManager : MonoBehaviour
 
         if (a_isFreeCameraMode)
         {
+            cameraModeImage.sprite = freeCameraIcon;
+
             freeCameraObject.transform.position = playerObject.transform.position;
             freeCameraObject.transform.rotation = Quaternion.Euler(playerObject.GetComponent<PlayerMotor>().rotationController.GetEulerRotation());
 
@@ -40,6 +50,8 @@ public class CameraModeManager : MonoBehaviour
         }
         else
         {
+            cameraModeImage.sprite = playerCameraIcon;
+
             playerObject.transform.position = freeCameraObject.transform.position;
 
             freeCameraObject.SetActive(false);
