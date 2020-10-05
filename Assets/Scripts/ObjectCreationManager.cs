@@ -250,12 +250,6 @@ public class ObjectCreationManager : MonoBehaviour
             m_activePrefabIndex = a_newActivePrefabIndex;
 
         GameObject newPrefabObject = Instantiate(prefabObjects[m_activePrefabIndex]);
-        if (m_controlledObject)
-        {
-            newPrefabObject.transform.position   = m_controlledObject.transform.position;
-            newPrefabObject.transform.rotation   = m_controlledObject.transform.rotation;
-            newPrefabObject.transform.localScale = m_controlledObject.transform.localScale;
-        }
 
         Destroy(m_controlledObject);
 
