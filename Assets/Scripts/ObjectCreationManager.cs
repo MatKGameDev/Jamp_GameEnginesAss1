@@ -56,6 +56,7 @@ public class ObjectCreationManager : MonoBehaviour
     void Start()
     {
         Physics.IgnoreLayerCollision(11, 12); //ignore first person prefab object collisions with player object
+        SetActiveMaterialIndex(0);
     }
 
     void Update()
