@@ -41,7 +41,6 @@ public class ObjectCreationManager : MonoBehaviour
 
 
 
-    int m_activePrefabIndex;
     int m_activePrefabIndex = -1;
     int m_activeMaterialIndex;
 
