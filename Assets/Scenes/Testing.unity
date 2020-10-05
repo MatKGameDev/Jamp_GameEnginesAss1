@@ -5316,7 +5316,7 @@ MonoBehaviour:
   freeCameraTransform: {fileID: 889086185}
   objectRotationSpeed: 50
   objectScaleSpeed: 1
-  firstPersonObjectOffset: 10
+  firstPersonObjectDistance: 10
   prefabObjects:
   - {fileID: 6191744551289276477, guid: eda40952d9e6d994b8dac89920d61ef0, type: 3}
   - {fileID: 5671518193924336, guid: 4c24c7fe88d6a7943b539a1b0c5be671, type: 3}

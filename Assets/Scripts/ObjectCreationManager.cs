@@ -7,13 +7,13 @@ public class ObjectCreationManager : MonoBehaviour
 {
     [Header("Camera")]
     public CameraModeManager cameraModeManager;
-    public Transform freeCameraTransform;
+    public Transform         freeCameraTransform;
 
     [Header("Object Manipulation")]
     public float objectRotationSpeed;
     public float objectScaleSpeed;
 
-    public float firstPersonObjectOffset;
+    public float firstPersonObjectDistance;
 
     [Header("Usable Prefabs")]
     public List<GameObject> prefabObjects = new List<GameObject>();
@@ -42,10 +42,13 @@ public class ObjectCreationManager : MonoBehaviour
 
 
     int m_activePrefabIndex;
+    int m_activePrefabIndex = -1;
     int m_activeMaterialIndex;
 
-    GameObject m_controlledObject = null;
-    Material m_currentMaterial = null;
+    float      m_controlledObjectDistance;
+    GameObject m_controlledObject  = null;
+    GameObject m_highlightedObject = null;
+    Material   m_currentMaterial   = null;
 
     bool m_isRotating = true;
     bool m_isScaling  = false;
@@ -57,7 +60,6 @@ public class ObjectCreationManager : MonoBehaviour
     void Start()
     {
         Physics.IgnoreLayerCollision(11, 12); //ignore first person prefab object collisions with player object
-        SetActivePrefabIndex(0);
     }
 
     void Update()
@@ -68,19 +70,19 @@ public class ObjectCreationManager : MonoBehaviour
         float mouseScrollWheelDelta = Input.GetAxis("Mouse ScrollWheel");
         if (mouseScrollWheelDelta > 0f || Input.GetKeyDown(KeyCode.RightArrow)) // if scrollwheel has moved up
         {
-            int newActivePrefabIndex = m_activePrefabIndex + 1;
-            if (newActivePrefabIndex >= prefabObjects.Count)
-                newActivePrefabIndex = 0;
+            m_activePrefabIndex++;
+            if (m_activePrefabIndex >= prefabObjects.Count)
+                m_activePrefabIndex = -1;
 
-            SetActivePrefabIndex(newActivePrefabIndex);
+            SetActivePrefabIndex(m_activePrefabIndex);
         }
         else if (mouseScrollWheelDelta < 0f || Input.GetKeyDown(KeyCode.LeftArrow)) // if scrollwheel has moved down
         {
-            int newActivePrefabIndex = m_activePrefabIndex - 1;
-            if (newActivePrefabIndex < 0)
-                newActivePrefabIndex = prefabObjects.Count - 1;
+            m_activePrefabIndex--;
+            if (m_activePrefabIndex < -1)
+                m_activePrefabIndex = prefabObjects.Count - 1;
 
-            SetActivePrefabIndex(newActivePrefabIndex);
+            SetActivePrefabIndex(m_activePrefabIndex);
         }
 
 
@@ -107,13 +109,9 @@ public class ObjectCreationManager : MonoBehaviour
             m_isScaling  = !m_isScaling;
 
             if (m_isRotating)
-            {
                 manipulationModeImage.sprite = rotateIcon;
-            }
             else
-            {
                 manipulationModeImage.sprite = scaleIcon;
-            }
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -141,33 +139,47 @@ public class ObjectCreationManager : MonoBehaviour
                 zAxisImage.color = nonSelectedElementColor;
         }
 
+        //fire ray and check for gameobject hit
+        if (Physics.Raycast(freeCameraTransform.position, freeCameraTransform.forward, out var cameraRaycastHit, 200f))
+        {
+            m_highlightedObject = cameraRaycastHit.transform.gameObject;
+        }
+        else
+        {
+            m_highlightedObject = null;
+        }
+
         if (Input.GetMouseButtonDown(0)) //left click
         {
             if (!m_controlledObject)
             {
-                //fire ray and check for gameobject hit
-
+                if (m_highlightedObject)
+                {
+                    m_controlledObjectDistance = Vector3.Distance(m_highlightedObject.transform.position, freeCameraTransform.position);
+                    m_controlledObject         = m_highlightedObject;
+                }
             }
-            else //and object is being controlled
+            else //an object is being controlled
             {
                 m_controlledObject.layer = 0; //default layer
-                m_controlledObject = null;
+                m_controlledObject       = null; //place the object
+                m_currentMaterial        = null;
 
-                m_currentMaterial = null;
+                m_activePrefabIndex = -1;
 
                 SetActivePrefabIndex(m_activePrefabIndex);
                 SetActiveMaterialIndex(m_activeMaterialIndex);
 
-                Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
+                //Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
 
-                if (!gameObjectRenderer)
-                {
-                    Debug.Log("doesn't have a renderer");
-                }
-                else
-                {
-                    gameObjectRenderer.material = m_currentMaterial;
-                }
+                //if (!gameObjectRenderer)
+                //{
+                //    Debug.Log("doesn't have a renderer");
+                //}
+                //else
+                //{
+                //    gameObjectRenderer.material = m_currentMaterial;
+                //}
             }
         }
     }
@@ -180,8 +192,8 @@ public class ObjectCreationManager : MonoBehaviour
         if (m_controlledObject)
         {
             m_controlledObject.layer = 12; //first person prefab layer
-
-            m_controlledObject.transform.position = freeCameraTransform.position + (freeCameraTransform.forward * firstPersonObjectOffset);
+            m_controlledObject.transform.position = (freeCameraTransform.forward * m_controlledObjectDistance)
+                                                    + freeCameraTransform.position;
 
             Vector3 currentAxis = new Vector3(Convert.ToInt32(m_isAxisX), Convert.ToInt32(m_isAxisY), Convert.ToInt32(m_isAxisZ));
 
@@ -196,53 +208,68 @@ public class ObjectCreationManager : MonoBehaviour
                 gameObjectRenderer.material = m_currentMaterial;
             }
 
-
-
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.R))
             {
                 if (m_isRotating)
                     m_controlledObject.transform.Rotate(currentAxis, objectRotationSpeed * Time.deltaTime);
                 else //isScaling
                     m_controlledObject.transform.localScale += objectScaleSpeed * Time.deltaTime * currentAxis;
 
-                arrowUpImage.color = nonSelectedElementColor;
-            }
-            else
-            {
                 arrowUpImage.color = selectedElementColor;
             }
+            else
+                arrowUpImage.color = nonSelectedElementColor;
 
-            if (Input.GetKey(KeyCode.DownArrow))
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.F))
             {
                 if (m_isRotating)
                     m_controlledObject.transform.Rotate(currentAxis, -objectRotationSpeed * Time.deltaTime);
                 else //isScaling
                     m_controlledObject.transform.localScale -= objectScaleSpeed * Time.deltaTime * currentAxis;
 
-                arrowDownImage.color = nonSelectedElementColor;
-            }
-            else
-            {
                 arrowDownImage.color = selectedElementColor;
             }
+            else
+                arrowDownImage.color = nonSelectedElementColor;
         }
     }
 
     void SetActivePrefabIndex(int a_newActivePrefabIndex)
     {
-        if (prefabObjects.Count <= a_newActivePrefabIndex)
-            return;
+        //check for -1 (empty index, player will be holding nothing)
+        if (a_newActivePrefabIndex == -1)
+        {
+            if (m_controlledObject)
+                Destroy(m_controlledObject);
 
-        m_activePrefabIndex = a_newActivePrefabIndex;
+            m_controlledObject = null;
+            return;
+        }
+
+        if (a_newActivePrefabIndex >= prefabObjects.Count)
+            m_activePrefabIndex = prefabObjects.Count - 1;
+        else if (a_newActivePrefabIndex < -1)
+            m_activePrefabIndex = 0;
+        else
+            m_activePrefabIndex = a_newActivePrefabIndex;
+
+        GameObject newPrefabObject = Instantiate(prefabObjects[m_activePrefabIndex]);
+        if (m_controlledObject)
+        {
+            newPrefabObject.transform.position   = m_controlledObject.transform.position;
+            newPrefabObject.transform.rotation   = m_controlledObject.transform.rotation;
+            newPrefabObject.transform.localScale = m_controlledObject.transform.localScale;
+        }
 
         Destroy(m_controlledObject);
 
-        m_controlledObject = Instantiate(prefabObjects[a_newActivePrefabIndex]);
+        m_controlledObjectDistance = firstPersonObjectDistance;
+        m_controlledObject         = newPrefabObject;
     }
 
     void SetActiveMaterialIndex(int a_newActiveMaterialIndex)
     {
-        if (materialTypes.Count <= a_newActiveMaterialIndex)
+        if (a_newActiveMaterialIndex >= materialTypes.Count || a_newActiveMaterialIndex < 0)
             return;
 
         m_activeMaterialIndex = a_newActiveMaterialIndex;
