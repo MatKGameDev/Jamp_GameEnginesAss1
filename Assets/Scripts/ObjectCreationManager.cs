@@ -14,9 +14,13 @@ public class ObjectCreationManager : MonoBehaviour
 
     public List<GameObject> prefabObjects = new List<GameObject>();
 
+    public List<Material> materialTypes = new List<Material>();
+
     int m_activePrefabIndex;
+    int m_activeMaterialIndex;
 
     GameObject m_controlledObject = null;
+    Material m_currentMaterial = null;
 
     bool m_isRotating = true;
     bool m_isScaling  = false;
@@ -52,6 +56,24 @@ public class ObjectCreationManager : MonoBehaviour
                 newActivePrefabIndex = prefabObjects.Count - 1;
 
             SetActivePrefabIndex(newActivePrefabIndex);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            int newActiveMaterialIndex = m_activeMaterialIndex + 1;
+            if (newActiveMaterialIndex >= materialTypes.Count)
+                newActiveMaterialIndex = 0;
+
+            SetActiveMaterialIndex(newActiveMaterialIndex);
+        }
+        else if (Input.GetKeyDown(KeyCode.O))
+        {
+            int newActiveMaterialIndex = m_activeMaterialIndex - 1;
+            if (newActiveMaterialIndex < 0)
+                newActiveMaterialIndex = materialTypes.Count - 1;
+
+            SetActiveMaterialIndex(newActiveMaterialIndex);
         }
 
         if (Input.GetKeyDown(KeyCode.Q))
@@ -99,7 +121,21 @@ public class ObjectCreationManager : MonoBehaviour
                 m_controlledObject.layer = 0; //default layer
                 m_controlledObject = null;
 
+                m_currentMaterial = null;
+
                 SetActivePrefabIndex(m_activePrefabIndex);
+                SetActiveMaterialIndex(m_activeMaterialIndex);
+
+                Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
+
+                if (!gameObjectRenderer)
+                {
+                    Debug.Log("doesn't have a renderer");
+                }
+                else
+                {
+                    gameObjectRenderer.material = m_currentMaterial;
+                }
             }
         }
     }
@@ -117,6 +153,19 @@ public class ObjectCreationManager : MonoBehaviour
 
             Vector3 currentAxis = new Vector3(Convert.ToInt32(m_isAxisX), Convert.ToInt32(m_isAxisY), Convert.ToInt32(m_isAxisZ));
 
+            Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
+
+            if (!gameObjectRenderer)
+            {
+                Debug.Log("doesn't have a renderer");
+            }
+            else
+            {
+                gameObjectRenderer.material = m_currentMaterial;
+            }
+
+
+
             if (Input.GetKey(KeyCode.UpArrow))
             {
                 if (m_isRotating)
@@ -132,6 +181,7 @@ public class ObjectCreationManager : MonoBehaviour
                 else //isScaling
                     m_controlledObject.transform.localScale -= objectScaleSpeed * Time.deltaTime * currentAxis;
             }
+
         }
     }
 
@@ -145,5 +195,17 @@ public class ObjectCreationManager : MonoBehaviour
         Destroy(m_controlledObject);
 
         m_controlledObject = Instantiate(prefabObjects[a_newActivePrefabIndex]);
+    }
+
+    void SetActiveMaterialIndex(int a_newActiveMaterialIndex)
+    {
+        if (materialTypes.Count <= a_newActiveMaterialIndex)
+            return;
+
+        m_activeMaterialIndex = a_newActiveMaterialIndex;
+
+        Destroy(m_currentMaterial);
+
+        m_currentMaterial = Instantiate(materialTypes[a_newActiveMaterialIndex]);
     }
 }
