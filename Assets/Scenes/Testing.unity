@@ -5259,6 +5259,15 @@ MonoBehaviour:
   zAxisImage: {fileID: 2052290783}
   arrowUpImage: {fileID: 415615803}
   arrowDownImage: {fileID: 1390206106}
+  - {fileID: 7859983027215946858, guid: fdc31dd277735384e8b1ea2a5d157f1e, type: 3}
+  materialTypes:
+  - {fileID: 2100000, guid: f6d8d5cdcf3b2954991dae6148a1e22f, type: 2}
+  - {fileID: 2100000, guid: 8110a12798510b646bb6c97041943662, type: 2}
+  - {fileID: 2100000, guid: 6cad0851c97d7e140aa937d574e55c5d, type: 2}
+  - {fileID: 2100000, guid: 7cfa50bb558bc3e4bb37bea6ebeaa413, type: 2}
+  - {fileID: 2100000, guid: 124cb84c4073923448beb43e693217dd, type: 2}
+  - {fileID: 2100000, guid: 368b7f833e3bf064f87a8014e81b3359, type: 2}
+  - {fileID: 2100000, guid: 8a0b35b7502d8094982f6fba123ee236, type: 2}
 --- !u!4 &1885166920
 Transform:
   m_ObjectHideFlags: 0
