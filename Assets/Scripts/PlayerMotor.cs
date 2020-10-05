@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 //Wall running is currently on its first iteration prototype so the code is super messy. Proceed with caution.
