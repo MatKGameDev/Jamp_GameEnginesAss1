@@ -7,13 +7,13 @@ public class ObjectCreationManager : MonoBehaviour
 {
     [Header("Camera")]
     public CameraModeManager cameraModeManager;
-    public Transform freeCameraTransform;
+    public Transform         freeCameraTransform;
 
     [Header("Object Manipulation")]
     public float objectRotationSpeed;
     public float objectScaleSpeed;
 
-    public float   firstPersonObjectDistance;
+    public float firstPersonObjectDistance;
 
     [Header("Usable Prefabs")]
     public List<GameObject> prefabObjects = new List<GameObject>();
@@ -80,13 +80,9 @@ public class ObjectCreationManager : MonoBehaviour
             m_isScaling  = !m_isScaling;
 
             if (m_isRotating)
-            {
                 manipulationModeImage.sprite = rotateIcon;
-            }
             else
-            {
                 manipulationModeImage.sprite = scaleIcon;
-            }
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -167,9 +163,7 @@ public class ObjectCreationManager : MonoBehaviour
                 arrowUpImage.color = selectedElementColor;
             }
             else
-            {
                 arrowUpImage.color = nonSelectedElementColor;
-            }
 
             if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.F))
             {
@@ -181,9 +175,7 @@ public class ObjectCreationManager : MonoBehaviour
                 arrowDownImage.color = selectedElementColor;
             }
             else
-            {
                 arrowDownImage.color = nonSelectedElementColor;
-            }
         }
     }
 
@@ -193,9 +185,7 @@ public class ObjectCreationManager : MonoBehaviour
         if (a_newActivePrefabIndex == -1)
         {
             if (m_controlledObject)
-            {
                 Destroy(m_controlledObject);
-            }
 
             m_controlledObject = null;
             return;
