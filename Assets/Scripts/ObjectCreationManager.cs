@@ -35,6 +35,12 @@ public class ObjectCreationManager : MonoBehaviour
     public Image arrowUpImage;
     public Image arrowDownImage;
 
+    
+
+    public List<Sprite> prefabImages = new List<Sprite>();
+
+
+
     int m_activePrefabIndex;
     int m_activeMaterialIndex;
 
