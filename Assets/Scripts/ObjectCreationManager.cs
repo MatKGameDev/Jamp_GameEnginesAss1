@@ -36,8 +36,6 @@ public class ObjectCreationManager : MonoBehaviour
     public Image arrowDownImage;
 
 
-
-
     int m_activePrefabIndex = -1;
     int m_activeMaterialIndex;
 
