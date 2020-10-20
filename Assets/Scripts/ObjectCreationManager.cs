@@ -47,6 +47,9 @@ public class ObjectCreationManager : MonoBehaviour
     bool m_isRotating = true;
     bool m_isScaling  = false;
 
+    float m_amountRotated;
+    float m_amountScaled;
+
     bool m_isAxisX = true;
     bool m_isAxisY = true;
     bool m_isAxisZ = true;
@@ -134,6 +137,15 @@ public class ObjectCreationManager : MonoBehaviour
                 zAxisImage.color = nonSelectedElementColor;
         }
 
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            Command.Undo();
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            Command.Redo();
+        }
+
         //fire ray and check for gameobject hit
         if (Physics.Raycast(freeCameraTransform.position, freeCameraTransform.forward, out var cameraRaycastHit, 200f))
         {
@@ -152,29 +164,13 @@ public class ObjectCreationManager : MonoBehaviour
                 {
                     m_controlledObjectDistance = Vector3.Distance(m_highlightedObject.transform.position, freeCameraTransform.position);
                     m_controlledObject         = m_highlightedObject;
+
+                    ObjectMovedCommand newCommand = new ObjectMovedCommand(m_highlightedObject, m_highlightedObject.transform.position, this);
                 }
             }
             else //an object is being controlled
             {
-                m_controlledObject.layer = 0; //default layer
-                m_controlledObject       = null; //place the object
-                m_currentMaterial        = null;
-
-                m_activePrefabIndex = -1;
-
-                SetActivePrefabIndex(m_activePrefabIndex);
-                SetActiveMaterialIndex(m_activeMaterialIndex);
-
-                //Renderer gameObjectRenderer = m_controlledObject.GetComponentInChildren<Renderer>();
-
-                //if (!gameObjectRenderer)
-                //{
-                //    Debug.Log("doesn't have a renderer");
-                //}
-                //else
-                //{
-                //    gameObjectRenderer.material = m_currentMaterial;
-                //}
+                ReleaseControlledObject();
             }
         }
     }
@@ -206,9 +202,19 @@ public class ObjectCreationManager : MonoBehaviour
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.R))
             {
                 if (m_isRotating)
-                    m_controlledObject.transform.Rotate(currentAxis, objectRotationSpeed * Time.deltaTime);
+                {
+                    float rotationAmount = objectRotationSpeed * Time.deltaTime;
+                    m_controlledObject.transform.Rotate(currentAxis, rotationAmount);
+
+                    m_amountRotated += rotationAmount;
+                }
                 else //isScaling
-                    m_controlledObject.transform.localScale += objectScaleSpeed * Time.deltaTime * currentAxis;
+                {
+                    float scaleAmount = objectScaleSpeed * Time.deltaTime;
+                    m_controlledObject.transform.localScale += scaleAmount * currentAxis;
+
+                    m_amountScaled += scaleAmount;
+                }
 
                 arrowUpImage.color = selectedElementColor;
             }
@@ -218,15 +224,59 @@ public class ObjectCreationManager : MonoBehaviour
             if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.F))
             {
                 if (m_isRotating)
-                    m_controlledObject.transform.Rotate(currentAxis, -objectRotationSpeed * Time.deltaTime);
+                {
+                    float rotationAmount = -objectRotationSpeed * Time.deltaTime;
+                    m_controlledObject.transform.Rotate(currentAxis, rotationAmount);
+
+                    m_amountRotated += rotationAmount;
+                }
                 else //isScaling
-                    m_controlledObject.transform.localScale -= objectScaleSpeed * Time.deltaTime * currentAxis;
+                {
+                    float scaleAmount = -objectScaleSpeed * Time.deltaTime;
+                    m_controlledObject.transform.localScale += scaleAmount * currentAxis;
+
+                    m_amountScaled += scaleAmount;
+                }
 
                 arrowDownImage.color = selectedElementColor;
             }
             else
                 arrowDownImage.color = nonSelectedElementColor;
+
+            if (Input.GetKeyUp(KeyCode.UpArrow)   || Input.GetKeyUp(KeyCode.R) ||
+                Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.F))
+            {
+                if (m_isRotating)
+                {
+                    RotateCommand newCommand = new RotateCommand(m_controlledObject, currentAxis, m_amountRotated);
+
+                    m_amountRotated = 0f;
+                }
+                else //isScaling
+                {
+                    ScaleCommand newCommand = new ScaleCommand(m_controlledObject, currentAxis, m_amountScaled);
+
+                    m_amountScaled = 0f;
+                }
+            }
         }
+    }
+
+    public void ReleaseControlledObject()
+    {
+        if (!m_controlledObject)
+        {
+            return;
+        }
+
+        m_controlledObject.layer = 0; //default layer
+        m_controlledObject       = null; //place the object
+        m_currentMaterial        = null;
+
+        m_activePrefabIndex = -1;
+
+        SetActivePrefabIndex(m_activePrefabIndex);
+        SetActiveMaterialIndex(m_activeMaterialIndex);
     }
 
     void SetActivePrefabIndex(int a_newActivePrefabIndex)
@@ -254,6 +304,8 @@ public class ObjectCreationManager : MonoBehaviour
 
         m_controlledObjectDistance = firstPersonObjectDistance;
         m_controlledObject         = newPrefabObject;
+
+        ObjectCreatedCommand newCommand = new ObjectCreatedCommand(newPrefabObject, this);
     }
 
     void SetActiveMaterialIndex(int a_newActiveMaterialIndex)
