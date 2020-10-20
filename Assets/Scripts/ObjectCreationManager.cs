@@ -165,7 +165,18 @@ public class ObjectCreationManager : MonoBehaviour
                     m_controlledObjectDistance = Vector3.Distance(m_highlightedObject.transform.position, freeCameraTransform.position);
                     m_controlledObject         = m_highlightedObject;
 
-                    ObjectMovedCommand newCommand = new ObjectMovedCommand(m_highlightedObject, m_highlightedObject.transform.position, this);
+                    ObjectMovedCommand movedCommand = new ObjectMovedCommand(m_highlightedObject, m_highlightedObject.transform.position, this);
+
+                    //set active material to current object's material (do it based on name since we cant compare the materials themselves due to how List.Contains() works)
+                    String objectMaterialName = m_highlightedObject.GetComponent<MeshRenderer>().sharedMaterial.name;
+                    for (int i = 0; i < materialTypes.Count; i++)
+                    {
+                        if (materialTypes[i].name == objectMaterialName)
+                        {
+                            SetActiveMaterialIndex(i);
+                            break;
+                        }
+                    }
                 }
             }
             else //an object is being controlled
@@ -248,13 +259,13 @@ public class ObjectCreationManager : MonoBehaviour
             {
                 if (m_isRotating)
                 {
-                    RotateCommand newCommand = new RotateCommand(m_controlledObject, currentAxis, m_amountRotated);
+                    RotateCommand rotateCommand = new RotateCommand(m_controlledObject, currentAxis, m_amountRotated);
 
                     m_amountRotated = 0f;
                 }
                 else //isScaling
                 {
-                    ScaleCommand newCommand = new ScaleCommand(m_controlledObject, currentAxis, m_amountScaled);
+                    ScaleCommand scaleCommand = new ScaleCommand(m_controlledObject, currentAxis, m_amountScaled);
 
                     m_amountScaled = 0f;
                 }
@@ -262,7 +273,7 @@ public class ObjectCreationManager : MonoBehaviour
         }
     }
 
-    public void ReleaseControlledObject()
+    public void ReleaseControlledObject(bool a_resetPrefabIndex = true)
     {
         if (!m_controlledObject)
         {
@@ -273,10 +284,13 @@ public class ObjectCreationManager : MonoBehaviour
         m_controlledObject       = null; //place the object
         m_currentMaterial        = null;
 
-        m_activePrefabIndex = -1;
-
-        SetActivePrefabIndex(m_activePrefabIndex);
         SetActiveMaterialIndex(m_activeMaterialIndex);
+
+        if (a_resetPrefabIndex)
+        {
+            m_activePrefabIndex = -1;
+            SetActivePrefabIndex(m_activePrefabIndex);
+        }
     }
 
     void SetActivePrefabIndex(int a_newActivePrefabIndex)
@@ -285,7 +299,11 @@ public class ObjectCreationManager : MonoBehaviour
         if (a_newActivePrefabIndex == -1)
         {
             if (m_controlledObject)
-                Destroy(m_controlledObject);
+            {
+                m_controlledObject.SetActive(false);
+                ObjectDisabledCommand disabledCommand = new ObjectDisabledCommand(m_controlledObject);
+                ReleaseControlledObject();
+            }
 
             m_controlledObject = null;
             return;
@@ -300,12 +318,17 @@ public class ObjectCreationManager : MonoBehaviour
 
         GameObject newPrefabObject = Instantiate(prefabObjects[m_activePrefabIndex]);
 
-        Destroy(m_controlledObject);
+        if (m_controlledObject)
+        {
+            m_controlledObject.SetActive(false);
+            ObjectDisabledCommand disabledCommand = new ObjectDisabledCommand(m_controlledObject);
+            ReleaseControlledObject(false);
+        }
 
         m_controlledObjectDistance = firstPersonObjectDistance;
         m_controlledObject         = newPrefabObject;
 
-        ObjectCreatedCommand newCommand = new ObjectCreatedCommand(newPrefabObject, this);
+        ObjectCreatedCommand createdCommand = new ObjectCreatedCommand(newPrefabObject, this);
     }
 
     void SetActiveMaterialIndex(int a_newActiveMaterialIndex)

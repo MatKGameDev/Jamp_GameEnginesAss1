@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class ObjectCreatedCommand : Command
 {
-    GameObject m_objectCopy;
-
     ObjectCreationManager m_creator;
 
     public ObjectCreatedCommand(GameObject a_objectCreated, ObjectCreationManager a_creator)
