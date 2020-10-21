@@ -35,6 +35,14 @@ public class ObjectCreationManager : MonoBehaviour
     public Image arrowUpImage;
     public Image arrowDownImage;
 
+    const int NUM_ENEMY_TYPES = 1;
+    const int NUM_TYPES_PER_ENEMY = 3;
+
+    int m_totalNumPrefabs;
+
+    EnemyFrogeFactory m_frogeFactory;
+
+    int m_frogeFactoryStartIndex;
 
     int m_activePrefabIndex = -1;
     int m_activeMaterialIndex;
@@ -56,6 +64,11 @@ public class ObjectCreationManager : MonoBehaviour
 
     void Start()
     {
+        m_frogeFactory = GetComponent<EnemyFrogeFactory>();
+
+        m_totalNumPrefabs = prefabObjects.Count + (NUM_ENEMY_TYPES * NUM_TYPES_PER_ENEMY);
+        m_frogeFactoryStartIndex = prefabObjects.Count;
+
         Physics.IgnoreLayerCollision(11, 12); //ignore first person prefab object collisions with player object
         SetActiveMaterialIndex(0);
     }
@@ -69,7 +82,7 @@ public class ObjectCreationManager : MonoBehaviour
         if (mouseScrollWheelDelta > 0f || Input.GetKeyDown(KeyCode.RightArrow)) // if scrollwheel has moved up
         {
             m_activePrefabIndex++;
-            if (m_activePrefabIndex >= prefabObjects.Count)
+            if (m_activePrefabIndex >= m_totalNumPrefabs)
                 m_activePrefabIndex = -1;
 
             SetActivePrefabIndex(m_activePrefabIndex);
@@ -78,7 +91,7 @@ public class ObjectCreationManager : MonoBehaviour
         {
             m_activePrefabIndex--;
             if (m_activePrefabIndex < -1)
-                m_activePrefabIndex = prefabObjects.Count - 1;
+                m_activePrefabIndex = m_totalNumPrefabs - 1;
 
             SetActivePrefabIndex(m_activePrefabIndex);
         }
@@ -194,6 +207,7 @@ public class ObjectCreationManager : MonoBehaviour
         if (m_controlledObject)
         {
             m_controlledObject.layer = 12; //first person prefab layer
+            //position the object based on the camera position and look direction
             m_controlledObject.transform.position = (freeCameraTransform.forward * m_controlledObjectDistance)
                                                     + freeCameraTransform.position;
 
@@ -210,6 +224,7 @@ public class ObjectCreationManager : MonoBehaviour
                 gameObjectRenderer.material = m_currentMaterial;
             }
 
+            //check for rotate/scale keys pressed
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.R))
             {
                 if (m_isRotating)
@@ -254,6 +269,7 @@ public class ObjectCreationManager : MonoBehaviour
             else
                 arrowDownImage.color = nonSelectedElementColor;
 
+            //once the key is release, create a command with the total amount rotated/scaled
             if (Input.GetKeyUp(KeyCode.UpArrow)   || Input.GetKeyUp(KeyCode.R) ||
                 Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.F))
             {
@@ -309,15 +325,23 @@ public class ObjectCreationManager : MonoBehaviour
             return;
         }
 
-        if (a_newActivePrefabIndex >= prefabObjects.Count)
-            m_activePrefabIndex = prefabObjects.Count - 1;
+        //do some validation on the passed in index
+        if (a_newActivePrefabIndex >= m_totalNumPrefabs)
+            m_activePrefabIndex = m_totalNumPrefabs - 1;
         else if (a_newActivePrefabIndex < -1)
             m_activePrefabIndex = 0;
         else
             m_activePrefabIndex = a_newActivePrefabIndex;
 
-        GameObject newPrefabObject = Instantiate(prefabObjects[m_activePrefabIndex]);
+        //create the new prefab
+        GameObject newPrefabObject;
 
+        if (m_activePrefabIndex >= m_frogeFactoryStartIndex)
+            newPrefabObject = m_frogeFactory.CreateFromIndex(m_activePrefabIndex - m_frogeFactoryStartIndex);
+        else
+            newPrefabObject = Instantiate(prefabObjects[m_activePrefabIndex]);
+
+        //if we were already controlling something, disable it
         if (m_controlledObject)
         {
             m_controlledObject.SetActive(false);
