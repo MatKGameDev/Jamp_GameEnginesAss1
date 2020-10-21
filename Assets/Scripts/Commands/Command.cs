@@ -25,9 +25,25 @@ public abstract class Command
         s_currentCommandIndex++;
     }
 
-    public static void Undo()
+    public static bool CanUndo()
     {
         if (s_currentCommandIndex < 0)
+            return false;
+
+        return true;
+    }
+
+    public static bool CanRedo()
+    {
+        if (s_currentCommandIndex > s_commandList.Count - 2)
+            return false;
+
+        return true;
+    }
+
+    public static void Undo()
+    {
+        if (!CanUndo())
             return;
 
         s_commandList[s_currentCommandIndex].PerformUndo();
@@ -36,7 +52,7 @@ public abstract class Command
 
     public static void Redo()
     {
-        if (s_currentCommandIndex > s_commandList.Count - 2)
+        if (!CanRedo())
             return;
 
         s_commandList[s_currentCommandIndex + 1].PerformRedo();

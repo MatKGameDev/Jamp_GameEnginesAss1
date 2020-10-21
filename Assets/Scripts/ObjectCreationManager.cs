@@ -35,6 +35,10 @@ public class ObjectCreationManager : MonoBehaviour
     public Image arrowUpImage;
     public Image arrowDownImage;
 
+    public Image undoImage;
+    public Image redoImage;
+
+
     const int NUM_ENEMY_TYPES = 1;
     const int NUM_TYPES_PER_ENEMY = 3;
 
@@ -119,45 +123,35 @@ public class ObjectCreationManager : MonoBehaviour
             m_isRotating = !m_isRotating;
             m_isScaling  = !m_isScaling;
 
-            if (m_isRotating)
-                manipulationModeImage.sprite = rotateIcon;
-            else
-                manipulationModeImage.sprite = scaleIcon;
+            manipulationModeImage.sprite = m_isRotating ? rotateIcon : scaleIcon;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             m_isAxisX = !m_isAxisX;
-            if (m_isAxisX)
-                xAxisImage.color = selectedElementColor;
-            else
-                xAxisImage.color = nonSelectedElementColor;
+
+            xAxisImage.color = m_isAxisX ? selectedElementColor : nonSelectedElementColor;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             m_isAxisY = !m_isAxisY;
-            if (m_isAxisY)
-                yAxisImage.color = selectedElementColor;
-            else
-                yAxisImage.color = nonSelectedElementColor;
+
+            yAxisImage.color = m_isAxisY ? selectedElementColor : nonSelectedElementColor;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             m_isAxisZ = !m_isAxisZ;
-            if (m_isAxisZ)
-                zAxisImage.color = selectedElementColor;
-            else
-                zAxisImage.color = nonSelectedElementColor;
+
+            zAxisImage.color = m_isAxisZ ? selectedElementColor : nonSelectedElementColor;
         }
 
         if (Input.GetKeyDown(KeyCode.Z))
-        {
             Command.Undo();
-        }
         else if (Input.GetKeyDown(KeyCode.X))
-        {
             Command.Redo();
-        }
+
+        undoImage.color = Command.CanUndo() ? selectedElementColor : nonSelectedElementColor;
+        redoImage.color = Command.CanRedo() ? selectedElementColor : nonSelectedElementColor;
 
         //fire ray and check for gameobject hit
         if (Physics.Raycast(freeCameraTransform.position, freeCameraTransform.forward, out var cameraRaycastHit, 200f))
