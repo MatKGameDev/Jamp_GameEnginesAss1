@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyFrogeFactory : EnemyFactory
+public class EnemyFrogeFactory : EnemyFactory<EnemyFrogeFactory>
 {
     public override GameObject CreateStationary()
     {

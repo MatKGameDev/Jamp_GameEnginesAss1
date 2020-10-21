@@ -64,7 +64,7 @@ public class ObjectCreationManager : MonoBehaviour
 
     void Start()
     {
-        m_frogeFactory = GetComponent<EnemyFrogeFactory>();
+        m_frogeFactory = EnemyFrogeFactory.Instance;
 
         m_totalNumPrefabs = prefabObjects.Count + (NUM_ENEMY_TYPES * NUM_TYPES_PER_ENEMY);
         m_frogeFactoryStartIndex = prefabObjects.Count;
@@ -181,7 +181,7 @@ public class ObjectCreationManager : MonoBehaviour
                     ObjectMovedCommand movedCommand = new ObjectMovedCommand(m_highlightedObject, m_highlightedObject.transform.position, this);
 
                     //set active material to current object's material (do it based on name since we cant compare the materials themselves due to how List.Contains() works)
-                    String objectMaterialName = m_highlightedObject.GetComponent<MeshRenderer>().sharedMaterial.name;
+                    String objectMaterialName = m_highlightedObject.GetComponentInChildren<MeshRenderer>().sharedMaterial.name;
                     for (int i = 0; i < materialTypes.Count; i++)
                     {
                         if (materialTypes[i].name == objectMaterialName)

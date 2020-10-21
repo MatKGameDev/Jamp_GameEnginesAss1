@@ -1,11 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Channels;
 using UnityEngine;
+using Object = System.Object;
 
-public abstract class EnemyFactory : MonoBehaviour
+public abstract class EnemyFactory<T> : Factory<T> where T : MonoBehaviour
 {
-    [SerializeField] protected GameObject enemyPrefab;
+    [SerializeField] protected GameObject enemyPrefab = null;
+
+    private void Start()
+    {
+        if (enemyPrefab == null)
+            Debug.Log("WARNING! AN ENEMY FACTORY DOES NOT HAVE A PREFAB ATTACHED!", this);
+    }
 
     public GameObject CreateFromIndex(int a_index)
     {
